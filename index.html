@@ -66,7 +66,7 @@ details{margin-top:18px;border-top:2px dashed var(--line);padding-top:12px}summa
 .foot{color:#b9cdbf;text-align:center;margin-top:24px;font-size:14px}
 .foot a{color:var(--acc)}
 [hidden]{display:none!important}
-@media(max-width:480px){.two{grid-template-columns:1fr}.row{grid-template-columns:1fr auto 32px}.row .n{grid-column:1/-1}
+@media(max-width:480px){.two{grid-template-columns:1fr}.row{grid-template-columns:1fr 32px}.row .n{grid-column:1/-1}.row .q{grid-column:1;grid-row:2}.row .x{grid-column:2;grid-row:2}.row .rs{grid-column:1/-1;grid-row:3;flex-wrap:wrap}
 ul.items li{flex-wrap:wrap}.shop{margin-left:32px}}
 @media(prefers-reduced-motion:no-preference){.btn{transition:filter .15s}}
 </style>
@@ -140,7 +140,8 @@ ul.items li{flex-wrap:wrap}.shop{margin-left:32px}}
 /* ---- Config: change these if the apps change their search URLs ---- */
 const STORES=[
   {name:"Blinkit",url:q=>"https://blinkit.com/s/?q="+encodeURIComponent(q)},
-  {name:"Instamart",url:q=>"https://www.swiggy.com/instamart/search?custom_back=true&query="+encodeURIComponent(q)}
+  {name:"Instamart",url:q=>"https://www.swiggy.com/instamart/search?custom_back=true&query="+encodeURIComponent(q)},
+  {name:"Zepto",url:q=>"https://www.zepto.com/search?query="+encodeURIComponent(q)}
 ];
 
 const $=s=>document.querySelector(s);
