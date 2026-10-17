@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RasoiCart: turn a recipe into a shoppable link</title>
+<meta name="description" content="Make a grocery list from your recipe and share it as one link. Viewers can find every item on Blinkit or Swiggy Instamart.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#143324;--paper:#fffcf0;--ink:#1b2a20;--mute:#66756a;--line:#ddd7bf;--acc:#f2b01e;--chili:#c8322a;
+--disp:"Bricolage Grotesque",ui-rounded,"Trebuchet MS",system-ui,sans-serif;--body:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);min-height:100vh}
+main{max-width:640px;margin:0 auto;padding:20px 16px 56px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.brand{font:800 20px var(--disp);color:var(--acc);text-decoration:none}
+h1{font:800 clamp(28px,7vw,40px)/1.08 var(--disp);color:var(--paper);margin:0 0 10px;letter-spacing:-.01em}
+.sub{color:#b9cdbf;margin:0 0 24px;max-width:46ch}
+.slip{background:var(--paper);border-radius:6px 6px 0 0;padding:22px 20px 30px;position:relative;
+-webkit-mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/14px 100%;
+mask:conic-gradient(from -45deg at bottom,#0000,#000 1deg 89deg,#0000 90deg) 50%/14px 100%;padding-bottom:36px}
+label.f{display:block;font-weight:600;font-size:14px;margin:0 0 14px}
+label.f span{display:block;margin-bottom:4px}
+input[type=text],input[type=url]{width:100%;font:inherit;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:10px 12px}
+textarea{width:100%;font:inherit;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:10px 12px;resize:vertical}
+input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+input:focus{border-color:var(--ink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+h2{font:800 18px var(--disp);margin:8px 0 10px}
+.row{display:grid;grid-template-columns:1fr 100px auto 36px;gap:8px;margin-bottom:8px;align-items:center}
+.rs{display:flex;gap:6px}
+.rs a{font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;border:1.5px solid var(--ink);border-radius:999px;padding:4px 10px;white-space:nowrap}
+.rs a:hover{background:var(--acc);border-color:var(--acc)}
+.rs a:not([href]){opacity:.35;border-color:var(--line);pointer-events:none}
+.phone{max-width:400px;margin:12px auto 0;border:6px solid var(--ink);border-radius:26px;overflow:hidden;background:var(--bg)}
+.phone iframe{display:block;width:100%;height:560px;border:0}
+.x{border:0;background:none;color:var(--mute);font-size:22px;cursor:pointer;border-radius:8px}
+.x:hover{color:var(--chili)}
+.btn{font:700 15px var(--body);border:0;border-radius:999px;padding:11px 20px;cursor:pointer;background:var(--acc);color:#2b2000;text-decoration:none;display:inline-block}
+.btn:hover{filter:brightness(.95)}
+.ghost{background:none;border:1.5px solid var(--ink);color:var(--ink)}
+.big{width:100%;padding:14px;font-size:17px;margin-top:12px}
+.err{color:var(--chili);font-weight:600;min-height:1.4em;margin:8px 0 0}
+#result{margin-top:18px;border-top:2px dashed var(--line);padding-top:16px}
+#result input{font-size:14px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.hint{color:var(--mute);font-size:13px;margin:10px 0 0}
+.meta{color:var(--mute);margin:0 0 4px}
+.slip h1{color:var(--ink);font-size:clamp(26px,6vw,34px)}
+ul.items{list-style:none;margin:16px 0;padding:0}
+ul.items li{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1.5px solid var(--line)}
+ul.items input{width:22px;height:22px;accent-color:var(--bg);flex:none}
+.nm{flex:1;min-width:0;overflow-wrap:anywhere}
+.nm b{font-weight:600}.nm small{display:block;color:var(--mute)}
+li.done .nm{text-decoration:line-through;color:var(--mute)}
+.shop{display:flex;gap:6px;flex:none}
+.shop a{font-size:13px;font-weight:700;color:var(--ink);text-decoration:none;border:1.5px solid var(--ink);border-radius:999px;padding:4px 10px}
+.shop a:hover{background:var(--acc);border-color:var(--acc)}
+.trow{margin:10px 0}.trow code{display:block;font-size:12px;color:var(--mute);overflow-wrap:anywhere;margin-top:4px}
+details{margin-top:18px;border-top:2px dashed var(--line);padding-top:12px}summary{font-weight:700;cursor:pointer}
+#mine{margin-top:18px;border-top:2px dashed var(--line);padding-top:12px}#mine .shop a{cursor:pointer}
+.foot{color:#b9cdbf;text-align:center;margin-top:24px;font-size:14px}
+.foot a{color:var(--acc)}
+[hidden]{display:none!important}
+@media(max-width:480px){.two{grid-template-columns:1fr}.row{grid-template-columns:1fr auto 32px}.row .n{grid-column:1/-1}
+ul.items li{flex-wrap:wrap}.shop{margin-left:32px}}
+@media(prefers-reduced-motion:no-preference){.btn{transition:filter .15s}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><a class="brand" href="#">🛒 RasoiCart</a></div>
+
+  <!-- CREATE -->
+  <section id="create">
+    <h1>Turn a recipe into a shoppable link</h1>
+    <p class="sub">List the ingredients once. Your viewers open one link and find every item on Blinkit or Swiggy Instamart.</p>
+    <div class="slip">
+      <div class="two">
+        <label class="f"><span>Recipe name</span><input type="text" id="title" maxlength="80" placeholder="Paneer butter masala"></label>
+        <label class="f"><span>Your name or channel</span><input type="text" id="creator" maxlength="60" placeholder="Priya’s Kitchen"></label>
+      </div>
+      <label class="f"><span>Video link (optional)</span><input type="url" id="video" placeholder="https://youtube.com/watch?v=..."></label>
+      <details id="paste"><summary>Paste a recipe to fill the list</summary>
+        <label class="f" style="margin-top:12px"><span>Recipe text or ingredient list</span><textarea id="ptxt" rows="6" maxlength="6000" placeholder="Paste from your video description or script. English, Hindi or Hinglish all work."></textarea></label>
+        <div class="acts"><button type="button" class="btn" id="pgo">Fill ingredients</button></div>
+        <p class="hint" id="pst" role="status"></p>
+      </details>
+      <h2>Ingredients</h2>
+      <div id="rows"></div>
+      <div class="acts"><button type="button" class="btn ghost" id="add">Add item</button><button type="button" class="btn ghost" id="ex">Fill an example</button></div>
+      <details id="pv" open><summary>Preview the shared page</summary>
+        <p class="hint" id="pvhint">Add a recipe name and one ingredient to see how viewers will see your link.</p>
+        <div class="phone" id="phone" hidden><iframe id="pvf" title="Preview of the shared page"></iframe></div>
+      </details>
+      <p class="err" id="err" role="alert"></p>
+      <button type="button" class="btn big" id="make">Create link</button>
+      <div id="result" hidden>
+        <label class="f"><span>Your shareable link</span><input type="text" id="url" readonly></label>
+        <div class="acts">
+          <button type="button" class="btn" id="copy">Copy link</button>
+          <a class="btn ghost" id="wa" target="_blank" rel="noopener">Share on WhatsApp</a>
+          <a class="btn ghost" id="open" target="_blank" rel="noopener">Open full page</a>
+        </div>
+        <p class="hint">Paste this link in your video description or pinned comment. Editing the list creates a new link.</p>
+      </div>
+      <div id="mine" hidden><h2>Your saved carts</h2><ul class="items" id="minelist"></ul><p class="hint">Saved in this browser only.</p></div>
+      <details id="tester">
+        <summary>Test the store links</summary>
+        <label class="f" style="margin-top:12px"><span>Sample item</span><input type="text" id="tq" value="onion" maxlength="40"></label>
+        <div id="tout"></div>
+        <p class="hint">Each button opens that store’s search for the item in a new tab. A working link shows search results for the item. If you land on the home page, the store changed its URL format: edit that store’s line in STORES at the top of the script. These are search links, not a pre-filled cart, because neither app offers a public link that fills someone’s cart.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- VIEW -->
+  <section id="view" hidden>
+    <div class="slip">
+      <p class="meta" id="vmeta"></p>
+      <h1 id="vtitle"></h1>
+      <div class="acts"><a class="btn" id="vvideo" target="_blank" rel="noopener" hidden>Watch the video</a></div>
+      <ul class="items" id="vitems"></ul>
+      <div class="acts">
+        <button type="button" class="btn ghost" id="vcopy">Copy list</button>
+        <a class="btn ghost" id="vwa" target="_blank" rel="noopener">Send on WhatsApp</a>
+        <button type="button" class="btn ghost" id="vedit">Edit a copy</button>
+      </div>
+      <p class="hint">Each button opens a search for that item in the app’s website. Availability and prices depend on your location.</p>
+    </div>
+    <p class="foot">Made with RasoiCart. <a href="#">Make your own cart</a></p>
+  </section>
+</main>
+
+<script>
+/* ---- Config: change these if the apps change their search URLs ---- */
+const STORES=[
+  {name:"Blinkit",url:q=>"https://blinkit.com/s/?q="+encodeURIComponent(q)},
+  {name:"Instamart",url:q=>"https://www.swiggy.com/instamart/search?custom_back=true&query="+encodeURIComponent(q)}
+];
+
+const $=s=>document.querySelector(s);
+let current=null;
+
+/* ---- Encode the cart into the link (compressed when supported) ---- */
+const b64u=b=>btoa(String.fromCharCode(...b)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const unb64u=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));
+async function pipe(bytes,stream){return new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer())}
+async function enc(o){
+  const raw=new TextEncoder().encode(JSON.stringify(o));
+  if("CompressionStream" in window) return "z"+b64u(await pipe(raw,new CompressionStream("deflate-raw")));
+  return "p"+b64u(raw);
+}
+async function dec(s){
+  const b=unb64u(s.slice(1));
+  const raw=s[0]==="z"?await pipe(b,new DecompressionStream("deflate-raw")):b;
+  return JSON.parse(new TextDecoder().decode(raw));
+}
+
+/* ---- Create form ---- */
+function addRow(n="",q=""){
+  const d=document.createElement("div");d.className="row";
+  d.innerHTML='<input type="text" class="n" maxlength="60" placeholder="Item (e.g. Onion)" aria-label="Item"><input type="text" class="q" maxlength="20" placeholder="Qty (2 pcs)" aria-label="Quantity"><div class="rs"></div><button type="button" class="x" aria-label="Remove item">×</button>';
+  d.querySelector(".n").value=n;d.querySelector(".q").value=q;
+  const rs=d.querySelector(".rs"),links=STORES.map(st=>{const a=document.createElement("a");a.target="_blank";a.rel="noopener";a.textContent=st.name;rs.appendChild(a);return[a,st]});
+  const sync=()=>{const v=d.querySelector(".n").value.trim();links.forEach(([a,st])=>{if(v){a.href=st.url(v);a.setAttribute("aria-label","Find "+v+" on "+st.name)}else a.removeAttribute("href")})};
+  d.querySelector(".n").addEventListener("input",sync);sync();
+  d.querySelector(".x").onclick=()=>{if($("#rows").children.length>1){d.remove();queuePrev()}};
+  d.querySelector(".q").addEventListener("keydown",e=>{
+    if(e.key==="Enter"&&d===$("#rows").lastElementChild){e.preventDefault();addRow().querySelector(".n").focus()}
+  });
+  $("#rows").appendChild(d);return d;
+}
+function fill(c){
+  $("#title").value=c.t||"";$("#creator").value=c.c||"";$("#video").value=c.v||"";
+  $("#rows").innerHTML="";(c.i||[]).forEach(a=>addRow(a[0],a[1]));
+  if(!$("#rows").children.length)addRow();
+  $("#result").hidden=true;queuePrev();
+}
+function cleanUrl(u){u=u.trim();if(!u)return"";if(!/^https?:\/\//i.test(u))u="https://"+u;try{return new URL(u).href}catch(e){return""}}
+function copy(text,btn,inputEl){
+  const done=()=>{const o=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=o,1500)};
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(text).then(done,()=>fallback());
+  else fallback();
+  function fallback(){
+    const el=inputEl||Object.assign(document.createElement("textarea"),{value:text});
+    if(!inputEl)document.body.appendChild(el);
+    el.select();try{document.execCommand("copy");done()}catch(e){}
+    if(!inputEl)el.remove();
+  }
+}
+
+$("#add").onclick=()=>addRow().querySelector(".n").focus();
+$("#make").onclick=async()=>{
+  const t=$("#title").value.trim(),err=$("#err");err.textContent="";
+  const items=[...document.querySelectorAll("#rows .row")].map(r=>[r.querySelector(".n").value.trim(),r.querySelector(".q").value.trim()]).filter(a=>a[0]);
+  if(!t){err.textContent="Add a recipe name.";$("#title").focus();return}
+  if(!items.length){err.textContent="Add at least one ingredient.";return}
+  const v=cleanUrl($("#video").value);
+  if($("#video").value.trim()&&!v){err.textContent="That video link doesn’t look right.";return}
+  const cart={t,c:$("#creator").value.trim(),v,i:items};
+  const link=location.href.split("#")[0]+"#c="+await enc(cart);
+  $("#url").value=link;$("#open").href=link;
+  $("#wa").href="https://wa.me/?text="+encodeURIComponent((t+" – shop all ingredients:\n"+link));
+  save(cart,link);$("#result").hidden=false;$("#result").scrollIntoView({behavior:"smooth",block:"nearest"});
+};
+$("#copy").onclick=e=>copy($("#url").value,e.target,$("#url"));
+
+/* ---- View page ---- */
+function render(c){
+  current=c;
+  document.title=c.t+" – shopping list | RasoiCart";
+  $("#vtitle").textContent=c.t;
+  $("#vmeta").textContent=c.c?"Recipe by "+c.c:"Shopping list";
+  const vv=$("#vvideo");if(c.v&&/^https?:\/\//i.test(c.v)){vv.href=c.v;vv.hidden=false}else vv.hidden=true;
+  const ul=$("#vitems");ul.innerHTML="";
+  c.i.forEach(([n,q],idx)=>{
+    const li=document.createElement("li");
+    const cb=document.createElement("input");cb.type="checkbox";cb.id="i"+idx;cb.setAttribute("aria-label","Got "+n);
+    cb.onchange=()=>li.classList.toggle("done",cb.checked);
+    const nm=document.createElement("div");nm.className="nm";
+    const b=document.createElement("b");b.textContent=n;nm.appendChild(b);
+    if(q){const s=document.createElement("small");s.textContent=q;nm.appendChild(s)}
+    const sh=document.createElement("div");sh.className="shop";
+    STORES.forEach(st=>{const a=document.createElement("a");a.href=st.url(n);a.target="_blank";a.rel="noopener";a.textContent=st.name;a.setAttribute("aria-label","Find "+n+" on "+st.name);sh.appendChild(a)});
+    li.append(cb,nm,sh);ul.appendChild(li);
+  });
+  const text=c.t+(c.c?" by "+c.c:"")+"\n"+c.i.map(a=>"- "+a[0]+(a[1]?" ("+a[1]+")":"")).join("\n");
+  $("#vcopy").onclick=e=>copy(text,e.target);
+  $("#vwa").href="https://wa.me/?text="+encodeURIComponent(text);
+  $("#vedit").onclick=()=>{fill(c);location.hash="";};
+}
+
+/* ---- Routing ---- */
+async function route(){
+  const m=location.hash.match(/^#c=([zp][\w-]+)$/);
+  let ok=false;
+  if(m){
+    try{const c=await dec(m[1]);if(c&&c.t&&Array.isArray(c.i)){render(c);ok=true}}catch(e){}
+  }
+  $("#view").hidden=!ok;$("#create").hidden=ok;
+  if(m&&!ok){$("#err").textContent="This link is broken or incomplete. Ask the creator to share it again."}
+  window.scrollTo(0,0);
+}
+/* ---- Paste a recipe: AI via /api/extract, basic parser as fallback ---- */
+function basicParse(text){
+  const unit="kg|g|gm|gms|gram|grams|ml|l|ltr|litre|litres|tsp|tbsp|cup|cups|pcs|pc|piece|pieces|pack|packet|bunch|clove|cloves|small|medium|large";
+  const re=new RegExp("^([\\d½¼¾./\\s-]+\\s*(?:"+unit+")?\\.?)\\s+(?:of\\s+)?(.+)$","i");
+  let lines=text.split(/\n+/);if(lines.length<2)lines=text.split(/,|;/);
+  return lines.map(l=>l.replace(/^[\s\-•*·\d]+[.)]\s+|^[\s\-•*·]+/,"").trim()).filter(Boolean).slice(0,40).map(l=>{
+    const m=l.match(re);return m?[m[2].trim().slice(0,60),m[1].trim().slice(0,20)]:[l.slice(0,60),""];
+  });
+}
+async function extract(){
+  const text=$("#ptxt").value.trim(),st=$("#pst"),btn=$("#pgo");
+  if(text.length<5){st.textContent="Paste some recipe text first.";return}
+  btn.disabled=true;st.textContent="Reading your recipe…";
+  let items,title="",note="";
+  try{
+    const r=await fetch("/api/extract",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text})});
+    if(!r.ok)throw 0;
+    const d=await r.json();
+    items=(d.items||[]).map(x=>[String(x.name||"").trim().slice(0,60),String(x.qty||"").trim().slice(0,20)]).filter(a=>a[0]);
+    title=d.title||"";if(!items.length)throw 0;
+  }catch(e){items=basicParse(text);note=" using basic matching, since the AI helper isn’t available"}
+  btn.disabled=false;
+  if(!items.length){st.textContent="Couldn’t find ingredients. Put one per line and try again.";return}
+  document.querySelectorAll("#rows .row").forEach(r=>{if(!r.querySelector(".n").value.trim()&&!r.querySelector(".q").value.trim())r.remove()});
+  items.forEach(a=>addRow(a[0],a[1]));
+  if(title&&!$("#title").value.trim())$("#title").value=title;
+  st.textContent="Added "+items.length+" ingredients"+note+". Check them below and edit as needed.";
+  queuePrev();
+}
+$("#pgo").onclick=extract;
+
+/* ---- Live preview of the shared page ---- */
+let pvT;
+function formCart(){
+  const items=[...document.querySelectorAll("#rows .row")].map(r=>[r.querySelector(".n").value.trim(),r.querySelector(".q").value.trim()]).filter(a=>a[0]);
+  return{t:$("#title").value.trim(),c:$("#creator").value.trim(),v:cleanUrl($("#video").value),i:items};
+}
+function queuePrev(){clearTimeout(pvT);pvT=setTimeout(updatePrev,350)}
+async function updatePrev(){
+  const c=formCart(),ok=!!(c.t&&c.i.length);
+  $("#phone").hidden=!ok;$("#pvhint").hidden=ok;
+  if(ok)$("#pvf").src=location.href.split("#")[0]+"#c="+await enc(c);
+}
+$("#create").addEventListener("input",queuePrev);
+
+/* ---- Example, saved carts, link tester ---- */
+const EX={t:"Paneer butter masala",c:"Test Kitchen",v:"",i:[["Paneer","200 g"],["Onion","2 pcs"],["Tomato","4 pcs"],["Butter","50 g"],["Fresh cream","100 ml"],["Kasuri methi","1 pack"]]};
+$("#ex").onclick=()=>fill(EX);
+const KEY="rasoicart:saved";
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}};
+const store=a=>{try{localStorage.setItem(KEY,JSON.stringify(a))}catch(e){}};
+function save(cart,link){store([{cart,link},...load().filter(x=>x.link!==link)].slice(0,20));list()}
+function list(){
+  const a=load(),ul=$("#minelist");$("#mine").hidden=!a.length;ul.innerHTML="";
+  a.forEach(x=>{
+    const li=document.createElement("li"),nm=document.createElement("div"),sh=document.createElement("div");
+    nm.className="nm";sh.className="shop";
+    const l=document.createElement("a");l.href=x.link;l.textContent=x.cart.t;l.style.color="inherit";
+    const s=document.createElement("small");s.textContent=x.cart.i.length+" items";
+    nm.append(l,s);
+    const e=document.createElement("a");e.textContent="Edit";e.tabIndex=0;e.onclick=()=>{fill(x.cart);window.scrollTo(0,0)};
+    const d=document.createElement("a");d.textContent="Delete";d.tabIndex=0;d.onclick=()=>{store(load().filter(y=>y.link!==x.link));list()};
+    sh.append(e,d);li.append(nm,sh);ul.appendChild(li);
+  });
+}
+function tester(){
+  const q=()=>$("#tq").value.trim()||"onion",out=$("#tout");
+  STORES.forEach(st=>{
+    const row=document.createElement("div"),a=document.createElement("a"),c=document.createElement("code");
+    row.className="trow";a.className="btn ghost";a.target="_blank";a.rel="noopener";a.textContent="Test "+st.name;
+    const upd=()=>{a.href=st.url(q());c.textContent=a.href};upd();
+    $("#tq").addEventListener("input",upd);row.append(a,c);out.appendChild(row);
+  });
+}
+addRow();addRow();addRow();list();tester();
+window.addEventListener("hashchange",route);route();
+</script>
+</body>
+</html>
